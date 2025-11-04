@@ -16,4 +16,6 @@ const jwt_access_secret = process.env.ACCESS_TOKEN_SECRET;
 const jwt_refresh_secret = process.env.REFRESH_TOKEN_SECRET;
 
 
-export { PORTNO, MONGODB_URL, jwt_access_secret, jwt_refresh_secret, jwt_options };
+const Gemini_API_Key = process.env.GEMINI_API_KEY;
+
+export { PORTNO, MONGODB_URL, jwt_access_secret, jwt_refresh_secret, jwt_options, Gemini_API_Key };
