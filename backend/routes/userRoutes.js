@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { getCurrentUserController, loginController, logoutController, registerController } from "../controllers/userController.js";
+import { getCurrentUserController, loginController, logoutController, refreshController, registerController } from "../controllers/userController.js";
 import { body } from "express-validator";
 import authMiddleware from './../middlewares/authMiddleware';
 
@@ -31,5 +31,6 @@ userRoutes.route('/logout').post(
     logoutController
 );
 
+userRoutes.route('/refresh').post(refreshController);
 
 export default userRoutes;

@@ -20,6 +20,10 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'documents',
         default: []
+    }],
+    collabInvites: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'permission',
     }]
 }, {
     timestamps: true

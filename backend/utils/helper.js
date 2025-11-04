@@ -1,21 +1,66 @@
 import jwt from 'jsonwebtoken';
 import { jwt_options } from '../config/serverConfig.js';
+import mongoose from 'mongoose';
 
 
 const generateTokens = (user) => {
-    const accessToken = jwt.sign(
-        { userId: user._id, email: user.email },
-        jwt_access_secret,
-        jwt_options
-    );
+    try {
 
-    const refreshToken = jwt.sign(
-        { userId: user._id, email: user.email },
-        jwt_refresh_secret,
-        { ...jwt_options, expiresIn: '7d' }
-    );
+        const accessToken = jwt.sign(
+            { userId: user._id, email: user.email },
+            jwt_access_secret,
+            jwt_options
+        );
 
-    return { accessToken, refreshToken };
+        const refreshToken = jwt.sign(
+            { userId: user._id, email: user.email },
+            jwt_refresh_secret,
+            { ...jwt_options, expiresIn: '7d' }
+        );
+
+        return { accessToken, refreshToken };
+    }
+    catch (err) {
+        throw new Error('Error generating tokens');
+    }
 }
 
-export { generateTokens };
+const verifyAccess = (token) => {
+    try {
+        const decoded = jwt.verify(token, jwt_access_secret, jwt_options);
+        return decoded;
+    } catch (err) {
+        throw new Error('Invalid token');
+    }
+}
+
+const verifyRefresh = (token) => {
+    try {
+        const decoded = jwt.verify(token, jwt_refresh_secret, { ...jwt_options, expiresIn: '7d' });
+        return decoded;
+    } catch (err) {
+        throw new Error('Invalid refresh token');
+    }
+}
+
+
+// TODO: Implement transaction based operations for cascading DB changes
+const useTransaction = async (callback) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const result = await callback(session);
+        await session.commitTransaction();
+        session.endSession();
+        return result;
+    }
+    catch (err) {
+        await session.abortTransaction();
+        throw err;
+    }
+    finally {
+        session.endSession();
+    }
+}
+
+export { generateTokens, verifyAccess, verifyRefresh, useTransaction };

@@ -7,7 +7,7 @@ const loginController = async (req, res, next) => {
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
-            res.locals.statusCode = 404;
+            res.locals.statusCode = 400;
             throw new Error('Insufficient or invalid login data');
         }
         const { email, password } = req.body;
@@ -24,8 +24,8 @@ const loginController = async (req, res, next) => {
             throw new Error('Incorrect password');
         }
 
-        const { accessToken, refreshToken } = await generateTokens(userExists);
-        
+        const { accessToken, refreshToken } = generateTokens(userExists);
+
         res.status(200).json({ message: 'Login successful', user: userExists, accessToken, refreshToken });
     } catch (err) {
         next(err);
@@ -36,7 +36,7 @@ const registerController = async (req, res, next) => {
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
-            res.locals.statusCode = 404;
+            res.locals.statusCode = 400;
             throw new Error('Insufficient or invalid registration data');
         }
         const { username, email, password } = req.body;
@@ -65,9 +65,38 @@ const logoutController = (req, res, next) => {
     }
 }
 
+const refreshController = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+        if (!refreshToken) {
+            res.locals.statusCode = 400;
+            throw new Error('Refresh token is required');
+        }
+
+        const user = verifyRefresh(refreshToken);
+        if (!user) {
+            res.locals.statusCode = 401;
+            throw new Error('Invalid refresh token');
+        }
+        const userExists = await getUserById(user.userId);
+        if (!userExists) {
+            res.locals.statusCode = 404;
+            throw new Error('User not found');
+        }
+
+        const newTokens = generateTokens(userExists);
+
+        res.status(200).json({ message: 'Tokens refreshed successfully', ...newTokens });
+    } catch (err) {
+        next(err);
+    }
+}
+
+
 export {
     loginController,
     registerController,
     getCurrentUserController,
-    logoutController
+    logoutController,
+    refreshController
 }
