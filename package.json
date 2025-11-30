@@ -1,0 +1,26 @@
+{
+  "name": "collaborative-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "startApp":"concurrently --prefix-colors \"blue,green\" \"cd frontend && npm run dev\" \"cd backend && npm start\"",
+    "installDeps":"npm ci && concurrently --prefix-colors \"blue,green\" \"cd frontend && npm ci\" \"cd backend && npm ci\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/purushartha01/Collaborative-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/purushartha01/Collaborative-Editor/issues"
+  },
+  "homepage": "https://github.com/purushartha01/Collaborative-Editor#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

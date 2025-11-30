@@ -1,6 +1,7 @@
 import { Router } from "express";
 import authMiddleware from './../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
+import { getAllDocuments, createDocument, getDocumentById, updateDocument, deleteDocument, shareDocument } from '../controllers/documentController.js';
 
 const documentRoutes = Router();
 

@@ -1,11 +1,13 @@
 import { Router } from "express";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { autoCompleter, grammarChecker, suggestionProvider, summarizer, textEnhancer } from "../controllers/aiController.js";
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 
 const aiRoutes = Router();
 
-aiRoutes.use(authMiddleware);
+
+// TODO: Uncomment the below line to enable authentication for AI routes
+// aiRoutes.use(authMiddleware);
 
 const fileContentValidator = [
     body('fileContent').isString().withMessage('fileContent must be a string').notEmpty().withMessage('fileContent cannot be empty'),
@@ -20,11 +22,11 @@ const fileContentValidator = [
 ]
 
 
-aiRoutes.route("/ai/grammar-check")
+aiRoutes.route("/grammar-check")
     .post(fileContentValidator, grammarChecker);
-aiRoutes.route("/ai/summarize").post(fileContentValidator, summarizer);
-aiRoutes.route("/ai/enhance").post(fileContentValidator, textEnhancer);
-aiRoutes.route("/ai/complete").post(fileContentValidator, autoCompleter);
-aiRoutes.route("/ai/suggestions").post(fileContentValidator, suggestionProvider);
+aiRoutes.route("/summarize").post(fileContentValidator, summarizer);
+aiRoutes.route("/enhance").post(fileContentValidator, textEnhancer);
+aiRoutes.route("/complete").post(fileContentValidator, autoCompleter);
+aiRoutes.route("/suggestions").post(fileContentValidator, suggestionProvider);
 
 export default aiRoutes;

@@ -35,5 +35,6 @@ export {
     getDocumentById,
     updateDocument,
     deleteDocument,
-    addCollaborator
+    addCollaborator,
+    
 }

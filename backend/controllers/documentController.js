@@ -123,3 +123,12 @@ const shareDocument = async (req, res, next) => {
         next(err);
     }
 }
+
+export {
+    getAllDocuments,
+    createDocument,
+    getDocumentById,
+    updateDocument,
+    deleteDocument,
+    shareDocument
+}
