@@ -10,30 +10,43 @@
 }
 
 :root {
-  --background: #432323;
+  --dark-color: #3e362e;
+  --light-color: #faf9f0;
+
   --font-color: #e0d9d9;
   --accent-color: #5a9690;
   --button-color: #2f5755;
 
   --funnel-font: "Funnel Sans", sans-serif;
-
   --text-size: 16px;
-  --heading-size: calc(var(--text-size) * 2);
 
+  --heading-size: calc(var(--text-size) * 2);
   --default-padding: 8px;
   --default-border-radius: 4px;
+
+  color-scheme: light dark;
 }
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--dark-color);
+    --foreground: var(--light-color);
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: var(--light-color);
+    --foreground: var(--dark-color);
+  }
 }
 
 html,
 body {
-  background-color: var(--background);
-  color: var(--font-color);
   font-size: var(--text-size);
   font-family: var(--funnel-font);
 }
@@ -48,7 +61,7 @@ button {
   font-family: var(--funnel-font);
 }
 
-button:hover {
+button:not(:disabled):hover {
   background-color: var(--accent-color);
   cursor: pointer;
   transform: scale(1.05);
@@ -71,4 +84,19 @@ h5,
 h6 {
   font-family: var(--funnel-font);
   margin-bottom: var(--default-padding);
+}
+
+.menu-bar {
+  background-color: var(--button-color);
+  color: var(--font-color);
+  position: fixed;
+  top: 0;
+  height: 80px;
+  width: 100%;
+}
+
+.editor-container {
+  max-height: calc(100dvh - 80px);
+  height: calc(100vh - 80px);
+  width: 100%;
 }
