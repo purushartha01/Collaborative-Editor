@@ -17,7 +17,7 @@ const Editor = () => {
     return (
         <div className="w-full h-full overflow-y-auto flex justify-center py-4 relative">
 
-            <div className="h-281.75 w-198.5 bg-orange-100 overflow-hidden text-black"  id="editor">
+            <div className="h-281.75 w-198.5 bg-orange-100 overflow-hidden text-black" id="editor">
                 <div>
                     <EditorRef
                         ref={quillRef}
@@ -26,7 +26,6 @@ const Editor = () => {
                         toolbarRef={toolbarRef}
                         onTextChange={(delta, oldDelta, source) => {
 
-                            console.log("Text change:", { delta, oldDelta, source });
                             setLastChange({ delta, oldDelta, source });
                         }}
                         onSelectionChange={(range, oldRange, source) => {

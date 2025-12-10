@@ -7,6 +7,7 @@ import { PORTNO } from "./config/serverConfig.js";
 import userRoutes from "./routes/userRoutes.js";
 import documentRoutes from './routes/documentRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/v1/api/sessions/oauth", authRouter);
 app.use("/v1/api/auth", userRoutes);
 app.use("/v1/api/documents", documentRoutes);
 app.use("/v1/api/ai", aiRoutes)

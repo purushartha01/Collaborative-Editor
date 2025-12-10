@@ -8,7 +8,7 @@ const OpenFile = ({ closePortal }) => {
     const [fileName, setFileName] = useState("");
 
     const handleSearch = () => {
-        console.log("Searching for file:", fileName);
+        // console.log("Searching for file:", fileName);
     }
 
     return (
@@ -52,7 +52,7 @@ const RecentFileList = () => {
         const fetchRecentFiles = async () => {
             await instance.get("/").then((res) => {
                 if (res.status.toString().startsWith(200)) {
-                    console.log("Recent files fetched successfully:", res.data.recentFiles);
+                    // console.log("Recent files fetched successfully:", res.data.recentFiles);
                 }
                 // setFiles(res.data.recentFiles);
 
@@ -64,7 +64,7 @@ const RecentFileList = () => {
 
         }
 
-        console.log("Fetching recent files...");
+        // console.log("Fetching recent files...");
         // fetchRecentFiles();
         setFiles([
             { name: "Project_Plan.docx", lastOpened: "2024-10-01" },

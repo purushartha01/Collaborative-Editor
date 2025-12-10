@@ -13,8 +13,18 @@ const userSchema = new mongoose.Schema({
         trim: true
     },
     password: {
+        type: String
+    },
+    googleId: {
         type: String,
-        required: true
+        default: null
+    },
+    googleProfilePic: {
+        type: String
+    },
+    profilePic: {
+        type: String,
+        default: null
     },
     collaborations: [{
         type: mongoose.Schema.Types.ObjectId,

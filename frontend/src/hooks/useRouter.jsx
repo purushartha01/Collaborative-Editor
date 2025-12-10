@@ -1,31 +1,32 @@
 import { createBrowserRouter } from 'react-router-dom';
 import PageLayout from '../pages/PageLayout';
+import AuthCallbackHandler from './../pages/AuthCallbackHandler';
+import AuthError from '../pages/AuthError';
+
 
 const useRouter = () => {
     const routes = [
         {
-            path: "/login",
-            element: <div>Login Page</div>
+            path: "/auth/callback",
+            element: <AuthCallbackHandler />
         },
         {
-            path: "/register",
-            element: <div>Register Page</div>
+            path: "/auth/error",
+            element: <AuthError />
         }
     ];
 
     const protectedRoutes = [
         {
-            path: "/documents",
-            element: <div>Documents Page - Protected</div>
+            path: "/",
+            element: <PageLayout />
         },
 
     ];
 
-
     const finalRoutes = [
         {
             path: "/",
-            element: <PageLayout />,
             children: [...routes, ...protectedRoutes]
         }
     ];

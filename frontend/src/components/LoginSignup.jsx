@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { EmailIcon, EyeClosedIcon, EyeOpenIcon, GoogleIcon, PasswordIcon, UserIcon } from "./Icons";
 import { UniversalInputWidget } from "./Widgets";
+import { BASE_URL } from './../config/axiosConfig';
 
 
 
@@ -27,7 +28,7 @@ const LoginForm = () => {
   });
 
   const onSubmit = (data) => {
-    console.log("Login data:", data);
+    // console.log("Login data:", data);
   }
 
   return (
@@ -84,7 +85,7 @@ const SignupForm = () => {
   });
 
   const onSubmit = (data) => {
-    console.log("Signup data:", data);
+    // console.log("Signup data:", data);
   }
 
   return (
@@ -138,6 +139,23 @@ const SignupForm = () => {
 }
 
 
+const GoogleSinginButton = () => {
+
+
+  const handleGoogleSignIn = () => {
+    const redirectTo = BASE_URL + `/sessions/oauth/google/initiate?redirectTo=/`;
+    window.location.href = redirectTo;
+  }
+
+  return <button
+    className="bg-white text-black border border-gray-500 rounded-4xl px-4 py-2 mt-2 row-span-2 w-60 items-center justify-center gap-4 flex flex-row self-center justify-self-center cursor-pointer hover:bg-gray-100 active:scale-95 transition-all"
+    onClick={handleGoogleSignIn}
+  >
+    <span><GoogleIcon className="w-6 h-6" /></span>
+    <span>Sign in with Google</span>
+  </button>
+}
+
 
 
 const LoginSignup = () => {
@@ -154,10 +172,7 @@ const LoginSignup = () => {
           }
         </span>
       </button>
-      <button className="bg-white text-black border border-gray-500 rounded-4xl px-4 py-2 mt-2 row-span-2 w-60 items-center justify-center gap-4 flex flex-row self-center justify-self-center cursor-pointer hover:bg-gray-100 active:scale-95 transition-all">
-        <span><GoogleIcon className="w-6 h-6" /></span>
-        <span>Sign in with Google</span>
-      </button>
+      <GoogleSinginButton />
     </div>
   )
 }

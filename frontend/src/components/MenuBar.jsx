@@ -99,7 +99,7 @@ const MenuItems = () => {
     }
   ]
 
-  console.log(activePortalContent);
+  // console.log(activePortalContent);
 
   const dropdownRef = useRef(null);
 

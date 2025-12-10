@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
-import { jwt_options } from '../config/serverConfig.js';
+import { baseUrl, jwt_access_secret, jwt_options, jwt_refresh_secret, State_Secret_Key } from '../config/serverConfig.js';
 import mongoose from 'mongoose';
 
 
 const generateTokens = (user) => {
     try {
-
         const accessToken = jwt.sign(
             { userId: user._id, email: user.email },
             jwt_access_secret,
@@ -63,4 +62,17 @@ const useTransaction = async (callback) => {
     }
 }
 
-export { generateTokens, verifyAccess, verifyRefresh, useTransaction };
+
+const createStateJWT = (payload) => {
+    return jwt.sign(payload, State_Secret_Key, { expiresIn: '10m' });
+}
+
+const verifyStateJWT = (token) => {
+    return jwt.verify(token, State_Secret_Key);
+}
+
+const generateFrontendRedirectURL = (tokens, redirectTo, user) => {
+    return new URL(`/auth/callback#token=${encodeURIComponent(tokens)}&redirectTo=${encodeURIComponent(redirectTo)}&user=${encodeURIComponent(JSON.stringify(user))}`, baseUrl);
+}
+
+export { generateTokens, verifyAccess, verifyRefresh, useTransaction, createStateJWT, verifyStateJWT, generateFrontendRedirectURL };
