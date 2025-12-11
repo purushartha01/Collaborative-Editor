@@ -1,5 +1,5 @@
 import { validationResult } from 'express-validator';
-import { getUserByEmail, hashPassword, matchPassword } from '../services/userService.js';
+import { addUser, getUserByEmail, hashPassword, matchPassword } from '../services/userService.js';
 import { generateTokens } from '../utils/helper.js';
 
 
@@ -16,6 +16,11 @@ const loginController = async (req, res, next) => {
         if (!userExists) {
             res.locals.statusCode = 404;
             throw new Error('No user found with provided credentials');
+        }
+
+        if (!userExists.password) {
+            res.locals.statusCode = 401;
+            throw new Error('Password login not enabled for this user');
         }
 
         const doesPasswordsMatch = await matchPassword(password, userExists.password);
@@ -39,14 +44,24 @@ const registerController = async (req, res, next) => {
             res.locals.statusCode = 400;
             throw new Error('Insufficient or invalid registration data');
         }
+
         const { username, email, password } = req.body;
+        const userExists = await getUserByEmail(email);
+
+        if (userExists) {
+            res.locals.statusCode = 409;
+            throw new Error('User with this email already exists');
+        }
+
         const hashedPassword = await hashPassword(password);
-        const user = await createUser({ username, email, password: hashedPassword });
+        const user = await addUser({ username, email, password: hashedPassword });
+
         res.status(201).json({ message: 'User registered successfully', user });
     } catch (err) {
         next(err);
     }
 }
+
 
 const getCurrentUserController = (req, res, next) => {
     try {

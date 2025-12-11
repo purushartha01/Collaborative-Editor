@@ -1,22 +1,27 @@
 import * as z from "zod";
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { EmailIcon, EyeClosedIcon, EyeOpenIcon, GoogleIcon, PasswordIcon, UserIcon } from "./Icons";
 import { UniversalInputWidget } from "./Widgets";
-import { BASE_URL } from './../config/axiosConfig';
+import instance, { BASE_URL } from './../config/axiosConfig';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from "sonner";
+import { AuthContext } from "../contexts/AuthContext";
 
 
 
-const LoginForm = () => {
+const LoginForm = ({ toggleForm }) => {
 
   const [showPassword, setShowPassword] = useState(false);
+  const { assignUser, assignTokens } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const loginFormSchema = z.object({
     email: z.email({
       message: "Invalid email address"
     }),
-    password: z.string().min(8, "Password must be at least 8 characters long"),
+    password: z.string().min(8, "Password must be at least 8 characters long").regex(/[A-Z]/, "Password must contain at least one uppercase letter").regex(/[a-z]/, "Password must contain at least one lowercase letter").regex(/[0-9]/, "Password must contain at least one number").regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
   })
 
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -28,7 +33,15 @@ const LoginForm = () => {
   });
 
   const onSubmit = (data) => {
-    // console.log("Login data:", data);
+    instance.post("/auth/login", data).then((response) => {
+      console.log("Login successful:", response.data);
+      assignUser(response.data.user);
+      assignTokens(response.data.accessToken, response.data.refreshToken);
+      window.location.hash = "";
+      toast.success("Login successful");
+    }).catch((error) => {
+      toast.error(error?.response?.data?.message || "Login failed");
+    });
   }
 
   return (
@@ -51,6 +64,7 @@ const LoginForm = () => {
         } />
 
         {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+        <Link to="/forgot-password" className="row-start-6 row-span-1 self-end justify-self-end text-sm text-blue-600 cursor-pointer">Forgot Password?</Link>
       </div>
       <button type="submit" className="button px-4 py-2 mt-4 row-start-7 row-span-1 w-20">Login</button>
     </form>
@@ -58,7 +72,7 @@ const LoginForm = () => {
 
 }
 
-const SignupForm = () => {
+const SignupForm = ({ toggleForm }) => {
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -68,10 +82,11 @@ const SignupForm = () => {
     email: z.email({
       message: "Invalid email address"
     }),
-    password: z.string().min(8, "Password must be at least 8 characters long"),
+    password: z.string().min(8, "Password must be at least 8 characters long").regex(/[A-Z]/, "Password must contain at least one uppercase letter").regex(/[a-z]/, "Password must contain at least one lowercase letter").regex(/[0-9]/, "Password must contain at least one number").regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
     confirmPassword: z.string().min(8, "Password must be at least 8 characters long"),
   }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
   const { register, handleSubmit, formState: { errors } } = useForm({
@@ -85,7 +100,14 @@ const SignupForm = () => {
   });
 
   const onSubmit = (data) => {
-    // console.log("Signup data:", data);
+    console.log("Signup data:", data);
+    instance.post("/auth/register", data).then((response) => {
+      toast.success("Signup successful! Please login to continue.");
+      toggleForm();
+      console.log("Signup successful:", response.data);
+    }).catch((error) => {
+      toast.error(error?.response?.data?.message || "Signup failed");
+    });
   }
 
   return (
@@ -139,7 +161,7 @@ const SignupForm = () => {
 }
 
 
-const GoogleSinginButton = () => {
+const GoogleSigninButton = () => {
 
 
   const handleGoogleSignIn = () => {
@@ -160,9 +182,10 @@ const GoogleSinginButton = () => {
 
 const LoginSignup = () => {
   const [showLoginForm, setShowLoginForm] = useState(true);
+
   return (
     <div className="h-full w-full grid grid-rows-12 p-4">
-      {showLoginForm ? <LoginForm /> : <SignupForm />}
+      {showLoginForm ? <LoginForm toggleForm={() => setShowLoginForm(!showLoginForm)} /> : <SignupForm toggleForm={() => setShowLoginForm(!showLoginForm)} />}
       <button onClick={() => setShowLoginForm(!showLoginForm)} className="bg-transparent appearance-none w-fit place-self-center">
         <span className="cursor-pointer text-blue-600">
           {
@@ -172,7 +195,7 @@ const LoginSignup = () => {
           }
         </span>
       </button>
-      <GoogleSinginButton />
+      <GoogleSigninButton />
     </div>
   )
 }

@@ -1,6 +1,5 @@
 import { RouterProvider } from "react-router-dom"
 import useRouter from "./hooks/useRouter"
-import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
 
@@ -8,9 +7,7 @@ function App() {
 
   return (
     <>
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
+      <RouterProvider router={router} />
     </>
   )
 }

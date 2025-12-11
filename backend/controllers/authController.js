@@ -63,9 +63,9 @@ const googleOAuthHandler = async (req, res, next) => {
 
         let redirectUrl = null;
         if (!doesUserExist) {
-            redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/profile', { username: user?.username, email: user?.email });
+            redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/profile', { username: user?.username, email: user?.email, id: user?._id });
         }
-        redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/', { username: user?.username, email: user?.email });
+        redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/', { username: user?.username, email: user?.email, id: user?._id });
 
         res.redirect(redirectUrl);
     } catch (err) {

@@ -6,6 +6,7 @@ const instance = axios.create({
     baseURL: BASE_URL, // Replace with your backend API base URL
     headers: {
         'Content-Type': 'application/json',
+        "Accept": "application/json",
     },
 });
 
