@@ -1,14 +1,31 @@
 import Quill from "quill";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import EditorRef from "./EditorRef";
+import { useFileStore } from "../hooks/useFileStore";
 
 
 
 const Delta = Quill.import('delta');
 
 const Editor = () => {
-    const [lastChange, setLastChange] = useState();
-    const [readOnly, setReadOnly] = useState(false);
+    const [readOnly, setReadOnly] = useState(true);
+
+    const currentPage = useFileStore((state) => state.currentPage);
+    // const setPageDelta = useFileStore((state) => state.updateFileDelta);
+    // const addNewPage = useFileStore((state) => state.addNewPage);
+    // const pages = useFileStore((state) => state.pages);
+
+    // const pageData = pages.find(p => p.pageNumber === currentPage);
+
+    // useEffect(() => {
+    //     if (!quillRef.current) return;
+    //     if (pageData?.delta) {
+    //         quillRef.current.setContents(pageData.delta);
+    //     } else {
+    //         quillRef.current.setContents(new Delta());
+    //     }
+
+    // }, [currentPage, pageData]);
 
 
     const quillRef = useRef();
@@ -26,7 +43,10 @@ const Editor = () => {
                         toolbarRef={toolbarRef}
                         onTextChange={(delta, oldDelta, source) => {
 
-                            setLastChange({ delta, oldDelta, source });
+                            const fullContent = quillRef.current.getContents();
+                            // ensure file is saved first before updating delta
+                            // useFileStore.getState().updateFileDelta(currentPage, fullContent);
+                            console.log("Content updated:", fullContent);
                         }}
                         onSelectionChange={(range, oldRange, source) => {
                             // Handle selection change if needed

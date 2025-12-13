@@ -31,7 +31,13 @@ const loginController = async (req, res, next) => {
 
         const { accessToken, refreshToken } = generateTokens(userExists);
 
-        res.status(200).json({ message: 'Login successful', user: userExists, accessToken, refreshToken });
+        const returnedUser = {
+            id: userExists.id,
+            username: userExists.username,
+            email: userExists.email
+        }
+
+        res.status(200).json({ message: 'Login successful', user: returnedUser, accessToken, refreshToken });
     } catch (err) {
         next(err);
     }

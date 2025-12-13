@@ -3,16 +3,17 @@ import PageLayout from '../pages/PageLayout';
 import AuthCallbackHandler from './../pages/AuthCallbackHandler';
 import AuthError from '../pages/AuthError';
 import { useContext } from 'react';
-import { AuthContext } from '../contexts/AuthContext';
 import Settings from './../pages/Settings';
 import Profile from './../pages/Profile';
 import NotFound from './../pages/NotFound';
 import ForgotPassword from './../pages/ForgotPassword';
+import useAuthStore from './useAuthStore';
+import EditorContainer from '../components/EditorContainer';
 
 
 const useRouter = () => {
 
-    const { user } = useContext(AuthContext);
+    const user = useAuthStore((s) => s.user);
 
     const routes = [
         {
@@ -25,7 +26,11 @@ const useRouter = () => {
         },
         {
             path: "/",
-            element: <PageLayout />
+            element: <PageLayout />,
+            children: user ? [{
+                path: "/document/:id",
+                element: <EditorContainer />
+            }] : []
         },
         {
             path: "/forgot-password",
@@ -45,6 +50,10 @@ const useRouter = () => {
         {
             path: "/profile",
             element: <Profile />
+        },
+        {
+            path: "/document/:id",
+            element: <EditorContainer />
         }
     ];
 

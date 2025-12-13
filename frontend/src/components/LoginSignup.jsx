@@ -7,15 +7,16 @@ import { UniversalInputWidget } from "./Widgets";
 import instance, { BASE_URL } from './../config/axiosConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
-import { AuthContext } from "../contexts/AuthContext";
+import useAuthStore from "../hooks/useAuthStore";
 
 
 
 const LoginForm = ({ toggleForm }) => {
 
   const [showPassword, setShowPassword] = useState(false);
-  const { assignUser, assignTokens } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const assignUser = useAuthStore((s) => s.assignUser);
+  const assignTokens = useAuthStore((s) => s.assignTokens);
+  // const navigate = useNavigate();
 
   const loginFormSchema = z.object({
     email: z.email({

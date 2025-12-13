@@ -1,12 +1,13 @@
 import { useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../contexts/AuthContext";
+import useAuthStore from "../hooks/useAuthStore";
 
 const AuthCallbackHandler = () => {
 
     const navigate = useNavigate();
 
-    const { assignTokens, assignUser } = useContext(AuthContext);
+    const assignTokens = useAuthStore((s) => s.assignTokens);
+    const assignUser = useAuthStore((s) => s.assignUser);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.hash.substring(1));

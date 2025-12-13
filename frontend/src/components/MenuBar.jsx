@@ -1,5 +1,4 @@
 import { useContext, useEffect, useMemo, useRef, useState } from "react"
-import { AuthContext } from "./../contexts/AuthContext"
 import { LoginSignupIcon, NewFileIcon, OpenFileIcon, SaveFileIcon, SettingsIcon, ShareIcon, UserIcon } from "./Icons"
 import Portal from "./PortalContainer"
 import NewFile from "./NewFile";
@@ -8,13 +7,14 @@ import SaveFile from './SaveFile';
 import ShareFile from './ShareFile';
 import LoginSignup from './LoginSignup';
 import { useNavigate } from 'react-router-dom';
+import useAuthStore from "../hooks/useAuthStore";
 
 const MenuItems = () => {
 
   const [isPortalVisible, setIsPortalVisible] = useState(false);
   const [activePortalContent, setActivePortalContent] = useState(null);
 
-  const { user } = useContext(AuthContext);
+  const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
 
   // TODO: To Ensure portal visibility when opening via url params, can render the portalContent via a functional Component that can also control the activePortalContent State
