@@ -62,9 +62,18 @@ body {
   width: 80px;
 }
 
+.button--fluid{
+  width: 100%;
+}
+
+.button--disabled{
+  background-color: var(--color-gray-500);
+  cursor: not-allowed;
+}
+
+
 .button:not(:disabled):hover {
   background-color: var(--accent-color);
-  cursor: pointer;
   transform: scale(1.05);
 }
 

@@ -7,13 +7,13 @@ import Settings from './../pages/Settings';
 import Profile from './../pages/Profile';
 import NotFound from './../pages/NotFound';
 import ForgotPassword from './../pages/ForgotPassword';
-import useAuthStore from './useAuthStore';
+import authStore from './../stores/authStore';
 import EditorContainer from '../components/EditorContainer';
 
 
 const useRouter = () => {
 
-    const user = useAuthStore((s) => s.user);
+    const user = authStore((s) => s.user);
 
     const routes = [
         {

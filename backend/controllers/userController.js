@@ -1,6 +1,6 @@
 import { validationResult } from 'express-validator';
-import { addUser, getUserByEmail, hashPassword, matchPassword } from '../services/userService.js';
-import { generateTokens } from '../utils/helper.js';
+import { addUser, getUserByEmail, getUserById, hashPassword, matchPassword } from '../services/userService.js';
+import { generateTokens, verifyRefresh } from '../utils/helper.js';
 
 
 const loginController = async (req, res, next) => {
@@ -37,7 +37,13 @@ const loginController = async (req, res, next) => {
             email: userExists.email
         }
 
-        res.status(200).json({ message: 'Login successful', user: returnedUser, accessToken, refreshToken });
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'development' ? false : true,
+            sameSite: 'None',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+        res.status(200).json({ message: 'Login successful', user: returnedUser, accessToken });
     } catch (err) {
         next(err);
     }
@@ -87,8 +93,11 @@ const logoutController = (req, res, next) => {
 }
 
 const refreshController = async (req, res, next) => {
+
+    // TODO: Refresh token flow needs to be tested more thoroughly
+
     try {
-        const { refreshToken } = req.body;
+        const refreshToken = req?.cookies?.refreshToken;
         if (!refreshToken) {
             res.locals.statusCode = 400;
             throw new Error('Refresh token is required');
@@ -105,9 +114,11 @@ const refreshController = async (req, res, next) => {
             throw new Error('User not found');
         }
 
-        const newTokens = generateTokens(userExists);
+        const { accessToken } = generateTokens(userExists);
 
-        res.status(200).json({ message: 'Tokens refreshed successfully', ...newTokens });
+        console.log("Tokens refreshed for user:", accessToken);
+
+        res.status(200).json({ message: 'Tokens refreshed successfully', accessToken });
     } catch (err) {
         next(err);
     }

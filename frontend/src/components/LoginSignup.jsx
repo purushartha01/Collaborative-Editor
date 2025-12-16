@@ -7,15 +7,15 @@ import { UniversalInputWidget } from "./Widgets";
 import instance, { BASE_URL } from './../config/axiosConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
-import useAuthStore from "../hooks/useAuthStore";
+import authStore from "../stores/authStore";
 
 
 
 const LoginForm = ({ toggleForm }) => {
 
   const [showPassword, setShowPassword] = useState(false);
-  const assignUser = useAuthStore((s) => s.assignUser);
-  const assignTokens = useAuthStore((s) => s.assignTokens);
+  const assignUser = authStore((s) => s.assignUser);
+  const assignAccessToken = authStore((s) => s.assignAccessToken);
   // const navigate = useNavigate();
 
   const loginFormSchema = z.object({
@@ -35,9 +35,9 @@ const LoginForm = ({ toggleForm }) => {
 
   const onSubmit = (data) => {
     instance.post("/auth/login", data).then((response) => {
-      console.log("Login successful:", response.data);
-      assignUser(response.data.user);
-      assignTokens(response.data.accessToken, response.data.refreshToken);
+      const { user, accessToken } = response.data;
+      assignUser(user);
+      assignAccessToken(accessToken);
       window.location.hash = "";
       toast.success("Login successful");
     }).catch((error) => {

@@ -19,11 +19,14 @@ const createDocument = async (req, res, next) => {
             throw new Error(result.array().map(err => err.msg).join(", "));
         }
 
-        const { title } = req.body;
+        const { title, collaborators } = req.body;
+
+        console.log("Creating document with title:", title);
+        console.log("Collaborators:", collaborators);
 
         const { newDocument, updatedUser } = await createDocument({
             title,
-            collaborators: [res.locals.user.id],
+            collaborators: [res.locals.user.id, ...(collaborators || [])],
         });
 
         if (!newDocument || !updatedUser) {

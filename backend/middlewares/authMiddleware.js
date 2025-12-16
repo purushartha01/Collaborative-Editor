@@ -1,9 +1,11 @@
 import { getUserById } from "../services/userService.js";
 import { verifyAccess } from "../utils/helper.js";
+import jwt from 'jsonwebtoken';
 
 
 const authMiddleware = async (req, res, next) => {
     try {
+        // TODO: Refresh token flow needs to be tested properly again
         console.log("Auth middleware executed");
 
         const authHeader = req.headers.authorization;
@@ -19,13 +21,14 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const decodedToken = verifyAccess(token);
+        console.log("Decoded Token:", decodedToken);
 
         if (!decodedToken) {
             res.locals.statusCode = 401;
             throw new Error('Invalid token');
         }
 
-        const userExists = await getUserById(decodedToken.id);
+        const userExists = await getUserById(decodedToken.userId);
         if (!userExists) {
             res.locals.statusCode = 404;
             throw new Error('User not found');
@@ -33,6 +36,11 @@ const authMiddleware = async (req, res, next) => {
         res.locals.user = decodedToken;
         next();
     } catch (err) {
+        console.error("Auth middleware error:", err);
+        if (!res.locals.statusCode && err instanceof jwt.TokenExpiredError) {
+            res.locals.statusCode = 401;
+            err.message = 'Access token expired';
+        }
         next(err);
     }
 }

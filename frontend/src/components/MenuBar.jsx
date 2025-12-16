@@ -7,20 +7,25 @@ import SaveFile from './SaveFile';
 import ShareFile from './ShareFile';
 import LoginSignup from './LoginSignup';
 import { useNavigate } from 'react-router-dom';
-import useAuthStore from "../hooks/useAuthStore";
+import authStore from "../stores/authStore";
 
 const MenuItems = () => {
 
   const [isPortalVisible, setIsPortalVisible] = useState(false);
   const [activePortalContent, setActivePortalContent] = useState(null);
 
-  const user = useAuthStore((s) => s.user);
+  const user = authStore((s) => s.user);
   const navigate = useNavigate();
 
   // TODO: To Ensure portal visibility when opening via url params, can render the portalContent via a functional Component that can also control the activePortalContent State
 
   const closePortal = () => {
     setIsPortalVisible(false);
+    setActivePortalContent(null);
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    hashParams.delete('openPortal');
+    const newHash = hashParams.toString();
+    window.location.hash = newHash ? `#${newHash}` : '';
   }
 
   const menuIconStyle = "h-8 aspect-square";
@@ -123,7 +128,10 @@ const MenuItems = () => {
       }
     };
 
+    handleHashChange(); // Check on initial load
     window.addEventListener('hashchange', handleHashChange);
+
+
 
     return () => {
       window.removeEventListener('hashchange', handleHashChange);

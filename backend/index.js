@@ -1,6 +1,7 @@
 import morgan from "morgan";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 import { connectToDB } from "./config/dbConfig.js";
 import { PORTNO } from "./config/serverConfig.js";
@@ -10,9 +11,11 @@ import aiRoutes from './routes/aiRoutes.js';
 import authRouter from "./routes/authRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
+
 const app = express();
 
-app.use(morgan("dev"));
+// TODO: Uncomment the below line to enable response logging
+// app.use(morgan("dev"));
 
 app.use((req, res, next) => {
     console.log(`${req.method} request received for ${req.url}`);
@@ -22,10 +25,12 @@ app.use((req, res, next) => {
 // TODO: Uncomment the below lines to enable CORS
 app.use(cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use("/v1/api/sessions/oauth", authRouter);
 app.use("/v1/api/auth", userRoutes);

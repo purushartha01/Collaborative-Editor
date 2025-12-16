@@ -20,16 +20,17 @@ const generateTokens = (user) => {
         return { accessToken, refreshToken };
     }
     catch (err) {
-        throw new Error('Error generating tokens');
+        throw err;
     }
 }
 
 const verifyAccess = (token) => {
     try {
         const decoded = jwt.verify(token, jwt_access_secret, jwt_options);
+        console.log("Decoded:", decoded);
         return decoded;
     } catch (err) {
-        throw new Error('Invalid token');
+        throw err;
     }
 }
 
@@ -38,7 +39,7 @@ const verifyRefresh = (token) => {
         const decoded = jwt.verify(token, jwt_refresh_secret, { ...jwt_options, expiresIn: '7d' });
         return decoded;
     } catch (err) {
-        throw new Error('Invalid refresh token');
+        throw err;
     }
 }
 

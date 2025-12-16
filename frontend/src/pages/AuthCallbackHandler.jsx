@@ -1,31 +1,31 @@
 import { useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom";
-import useAuthStore from "../hooks/useAuthStore";
+import authStore from "../stores/authStore";
 
 const AuthCallbackHandler = () => {
 
     const navigate = useNavigate();
 
-    const assignTokens = useAuthStore((s) => s.assignTokens);
-    const assignUser = useAuthStore((s) => s.assignUser);
+    const assignAccessToken = authStore((s) => s.assignAccessToken);
+    const assignUser = authStore((s) => s.assignUser);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.hash.substring(1));
-        const { accessToken, refreshToken } = JSON.parse(urlParams.get('token'));
+        const { accessToken } = JSON.parse(urlParams.get('token'));
         const user = JSON.parse(urlParams.get('user'));
         const redirectPath = urlParams.get('redirectTo');
 
 
-        if (!!accessToken && !!refreshToken && !!user) {
+        if (!!accessToken && !!user) {
             // 
             assignUser(user);
-            assignTokens(accessToken, refreshToken);
+            assignAccessToken(accessToken);
             navigate(redirectPath, { replace: true });
         } else {
             navigate("/", { replace: true });
         }
 
-    }, [navigate, assignTokens, assignUser]);
+    }, [navigate, assignAccessToken, assignUser]);
 
     return (
         <div className="h-full w-full grid place-items-center">

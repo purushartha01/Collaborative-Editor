@@ -3,17 +3,18 @@ import authMiddleware from './../middlewares/authMiddleware.js';
 import { body } from 'express-validator';
 import { getAllDocuments, createDocument, getDocumentById, updateDocument, deleteDocument, shareDocument } from '../controllers/documentController.js';
 
+
 const documentRoutes = Router();
 
 documentRoutes.use(authMiddleware)
 
-documentRoutes.route("/documents")
+documentRoutes.route("/")
     .get(getAllDocuments)
     .post([
         body("title").notEmpty().withMessage("Title is required")
     ], createDocument);
 
-documentRoutes.route("/documents/:id")
+documentRoutes.route("/:id")
     .get(getDocumentById)
     .put(
         [
@@ -23,7 +24,7 @@ documentRoutes.route("/documents/:id")
         ], updateDocument)
     .delete(deleteDocument);
 
-documentRoutes.route("/documents/:id/share")
+documentRoutes.route("/:id/share")
     .post([
         body("shareWith").isMongoId().withMessage("Valid userId is required"),
         body("role").isIn(["owner", "editor", "viewer"]).withMessage("Role must be one of owner, editor, viewer")

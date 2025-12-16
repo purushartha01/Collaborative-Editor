@@ -3,18 +3,18 @@ import { persist } from 'zustand/middleware';
 
 
 // Encrypted storage to be implemented here
-const useAuthStore = create(persist(
+const authStore = create(persist(
     (set) => ({
         user: null,
         accessToken: null,
-        refreshToken: null,
         assignUser: (user) => set({ user }),
-        assignTokens: ({ accessToken, refreshToken }) => set({ accessToken, refreshToken }),
-        clearAuth: () => set({ user: null, accessToken: null, refreshToken: null }),
+        assignAccessToken: (accessToken) => set({ accessToken }),
+        clearAuth: () => set({ user: null, accessToken: null }),
+        clearAccessToken: () => set({ accessToken: null }),
     }),
     {
         name: 'auth-storage', // unique name
     })
 );
 
-export default useAuthStore;
+export default authStore;

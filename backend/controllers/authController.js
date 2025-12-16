@@ -63,10 +63,16 @@ const googleOAuthHandler = async (req, res, next) => {
 
         let redirectUrl = null;
         if (!doesUserExist) {
-            redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/profile', { username: user?.username, email: user?.email, id: user?._id });
+            redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken }), '/profile', { username: user?.username, email: user?.email, id: user?._id });
         }
-        redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken, refreshToken }), '/', { username: user?.username, email: user?.email, id: user?._id });
+        redirectUrl = generateFrontendRedirectURL(JSON.stringify({ accessToken }), '/', { username: user?.username, email: user?.email, id: user?._id });
 
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'development' ? false : true,
+            sameSite: 'None',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
         res.redirect(redirectUrl);
     } catch (err) {
         next(err);

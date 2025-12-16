@@ -33,7 +33,7 @@ export const deleteFileFromDB = async (id) => {
     return await fileDB.delete("files", id);
 }
 
-export const useFileStore = create((set, get) => ({
+export const fileStore = create((set, get) => ({
     fileId: null,
     fileTitle: "Untitled Document",
     pages: [{ pageNumber: 1, delta: null }],
