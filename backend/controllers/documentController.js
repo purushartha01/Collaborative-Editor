@@ -1,17 +1,26 @@
 import { validationResult } from "express-validator";
-import { addCollaborator, getAllDocumentsForUser } from "../services/documentServices.js";
+import { addCollaborator, getAllDocumentsForUser, createDocument, updateDocument, searchDocumentsByTitleForUser, getDocumentById } from "../services/documentServices.js";
 import { grantPermissionBasedOnRole } from "../services/permissionServices.js";
 
-const getAllDocuments = async (req, res, next) => {
+const getAllDocumentsController = async (req, res, next) => {
     try {
-        const documents = await getAllDocumentsForUser(res.locals.user.id);
-        res.json({ documents });
+        const { fileTitle } = req.query;
+        if (fileTitle) {
+            // Implement search functionality here
+            console.log("Searching documents with title:", fileTitle);
+            const documents = await searchDocumentsByTitleForUser(fileTitle, res.locals.user.userId);
+            console.log("Search results:", documents);
+            return res.json({ documents });
+        } else {
+            const documents = await getAllDocumentsForUser(res.locals.user.userId);
+            res.json({ documents });
+        }
     } catch (err) {
         next(err);
     }
 }
 
-const createDocument = async (req, res, next) => {
+const createDocumentController = async (req, res, next) => {
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
@@ -24,10 +33,13 @@ const createDocument = async (req, res, next) => {
         console.log("Creating document with title:", title);
         console.log("Collaborators:", collaborators);
 
+        // TODO: Remember to add permission entries for collaborators in the permission collection
         const { newDocument, updatedUser } = await createDocument({
-            title,
-            collaborators: [res.locals.user.id, ...(collaborators || [])],
-        });
+            title
+        }, res.locals.user.userId);
+
+        console.log("New document created:", newDocument);
+        console.log("Updated user:", updatedUser);
 
         if (!newDocument || !updatedUser) {
             res.locals.statusCode = 500;
@@ -40,7 +52,7 @@ const createDocument = async (req, res, next) => {
     }
 }
 
-const getDocumentById = async (req, res, next) => {
+const getDocumentByIdController = async (req, res, next) => {
     try {
         const document = await getDocumentById(req.params.id);
         if (!document) {
@@ -53,9 +65,8 @@ const getDocumentById = async (req, res, next) => {
     }
 }
 
-
 // TODO: Implement permission check
-const updateDocument = async (req, res, next) => {
+const updateDocumentController = async (req, res, next) => {
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
@@ -63,11 +74,15 @@ const updateDocument = async (req, res, next) => {
             throw new Error(result.array().map(err => err.msg).join(", "));
         }
 
-        const { title, content } = req.body;
+        const fileId = req.params.id;
+
+        const { title, pages } = req.body;
+
+        console.log("Updating document:", fileId, title, pages);
 
         const updatedDocument = await updateDocument(req.params.id, {
             title,
-            content,
+            pages,
         });
 
         if (!updatedDocument) {
@@ -83,7 +98,7 @@ const updateDocument = async (req, res, next) => {
 
 
 // TODO: Implement permission check
-const deleteDocument = async (req, res, next) => {
+const deleteDocumentController = async (req, res, next) => {
     try {
         const deletedDocument = await deleteDocument(req.params.id);
         if (!deletedDocument) {
@@ -96,7 +111,7 @@ const deleteDocument = async (req, res, next) => {
     }
 }
 
-const shareDocument = async (req, res, next) => {
+const shareDocumentController = async (req, res, next) => {
     try {
         const result = validationResult(req);
         if (!result.isEmpty()) {
@@ -128,10 +143,10 @@ const shareDocument = async (req, res, next) => {
 }
 
 export {
-    getAllDocuments,
-    createDocument,
-    getDocumentById,
-    updateDocument,
-    deleteDocument,
-    shareDocument
+    getAllDocumentsController,
+    createDocumentController,
+    getDocumentByIdController,
+    updateDocumentController,
+    deleteDocumentController,
+    shareDocumentController
 }

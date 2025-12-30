@@ -111,14 +111,13 @@ const MenuItems = () => {
 
   useEffect(() => {
     const handleHashChange = () => {
-      console.log("Hash changed:", window.location.hash);
+      // console.log("Hash changed:", window.location.hash);
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const openPortal = hashParams.get('openPortal');
-      console.log("openPortal param:", openPortal);
+      // console.log("openPortal param:", openPortal);
       if (openPortal !== "") {
         const menuItem = menuItems.find(item => item.name.toLowerCase() === openPortal?.toLowerCase());
         if (menuItem) {
-          console.log("Opening portal for menu item:", menuItem.name);
           setIsPortalVisible(menuItem.needsDropdown ? true : false);
           setActivePortalContent(menuItem.portalContent);
         } else {
@@ -179,6 +178,15 @@ const MenuItems = () => {
 
 
 const MenuBar = () => {
+  const user = authStore((s) => s.user);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/#openPortal=login');
+    }
+  }, [user, navigate]);
+
   return (
     <div className="menu-bar">
       <MenuItems />

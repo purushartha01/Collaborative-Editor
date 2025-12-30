@@ -1,14 +1,17 @@
-import { useEffect, useState } from "react";
-import authStore from '../stores/authStore';
+import { useState } from "react";
 import { toast } from 'sonner';
 import { BarSpinner } from "./Icons";
 import instance from "./../config/axiosConfig"
+import { useNavigate } from 'react-router-dom';
+import { fileStore } from "../stores/fileStore";
 
 const NewFile = ({ closePortal }) => {
 
     const [fileName, setFileName] = useState("");
     const [collaborators, setCollaborators] = useState([]);
     const [isCreating, setIsCreating] = useState(false);
+    const navigate = useNavigate();
+    const addNewFile = fileStore((s) => s.addNewFile);
 
     const validateFileName = () => {
         return fileName.trim().length > 0;
@@ -31,6 +34,9 @@ const NewFile = ({ closePortal }) => {
                 toast.success("File created successfully");
                 // Optionally, you can redirect to the new document or update the state
                 console.log("Created Document:", res.data);
+                closePortal();
+                addNewFile(fileName, res.data.document);
+                navigate(`/document/${res.data.document}`);
             })
             .catch((err) => {
                 console.error("Error creating document:", err);
@@ -58,6 +64,7 @@ const NewFile = ({ closePortal }) => {
                 />
             </div>
             <div className="row-start-6 row-span-3 grid gap-1">
+                {/* TODO: Add collaborator selection feature */}
                 <label className="font-semibold mb-1">Invite Collaborators</label>
                 <input type="text" className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter usernames" />
             </div>

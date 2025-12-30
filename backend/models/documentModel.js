@@ -5,9 +5,9 @@ const documentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    content: {
-        type: String,
-        default: '',
+    pages: {
+        type: Array,
+        default: [],
     },
     collaborators: [{
         type: mongoose.Schema.Types.ObjectId,
