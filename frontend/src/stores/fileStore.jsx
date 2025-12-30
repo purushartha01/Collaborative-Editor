@@ -60,7 +60,19 @@ export const fileStore = create((set, get) => ({
             console.error("Error adding new file:", err);
         }
     },
-
+    addExistingFile: async (file) => {
+        try {
+            set({
+                fileId: file.fileId,
+                fileTitle: file.fileTitle,
+                pages: file.pages,
+                currentPage: 1
+            });
+            await saveFileToDB(file);
+        } catch (err) {
+            console.error("Error setting and updating file:", err);
+        }
+    },
     loadFile: async (id) => {
         try {
             const file = await getFileFromDB(id);

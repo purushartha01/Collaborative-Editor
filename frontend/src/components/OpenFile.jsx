@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { BarSpinner, SearchIcon } from "./Icons"
 import instance from './../config/axiosConfig';
 import useDebounce from "../hooks/useDebounce";
+import { fileStore } from "../stores/fileStore";
+import { useNavigate } from 'react-router-dom';
 
 
-const RecentFileList = () => {
+const RecentFileList = ({ handleOpenFile }) => {
     const [resultFiles, setResultFiles] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -24,8 +26,6 @@ const RecentFileList = () => {
         fetchRecentFiles();
     }, []);
 
-
-
     return <>
         {
             loading ?
@@ -41,10 +41,10 @@ const RecentFileList = () => {
                         )
                         :
                         resultFiles.map((file, index) => (
-                            <div key={index} className="p-2 border-b border-gray-300 hover:bg-gray-100 cursor-pointer flex justify-between items-center px-2">
+                            <button key={file._id} className="p-2 w-full border-b border-gray-300 hover:bg-gray-100 cursor-pointer flex justify-between items-center px-2" onClick={(e) => handleOpenFile(e, file._id)}>
                                 <h2 className="text-lg font-medium">{file.title}</h2>
                                 <span className="text-sm text-gray-500">Last updated: {new Date(file.updatedAt).toLocaleString()}</span>
-                            </div>
+                            </button>
                         ))
                 )
         }
@@ -60,10 +60,22 @@ const OpenFile = ({ closePortal }) => {
     const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
 
+    const navigate = useNavigate();
+
+
     const handleSearch = (e) => {
         setValue(e.target.value);
     }
 
+    const handleOpenFile = (e, fileId) => {
+        e.preventDefault();
+        console.log("Opening file with ID:", fileId);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        hashParams.delete('openPortal');
+        const newHash = hashParams.toString();
+        window.location.hash = newHash ? `#${newHash}` : '';
+        navigate(`document/${fileId}`)
+    }
 
     useEffect(() => {
         if (debouncedValue.trim().length < 3) {
@@ -122,10 +134,10 @@ const OpenFile = ({ closePortal }) => {
                             {!isSearching && (searchResults.length === 0 ? <div className="text-gray-700 place-self-center">No files found.</div> :
                                 searchResults.map((file, index) => {
                                     return (
-                                        <div key={index} className="p-2 border-b border-gray-300 hover:bg-gray-100 cursor-pointer flex justify-between items-center px-2">
+                                        <button key={index} className="p-2 border-b border-gray-300 hover:bg-gray-100 cursor-pointer flex w-full justify-between items-center px-2" onClick={(e) => handleOpenFile(e, file._id)}>
                                             <h2 className="text-lg text-black font-medium">{file.title}</h2>
                                             <span className="text-sm text-black">Last updated: {new Date(file.updatedAt).toLocaleString()}</span>
-                                        </div>
+                                        </button>
                                     )
                                 }))
                             }
@@ -135,7 +147,7 @@ const OpenFile = ({ closePortal }) => {
             </div>
             <h1 className="text-xl pt-1 pl-2 w-full border-b border-gray-800">Recent Files:</h1>
             <div className="w-full h-full overflow-y-auto styled-scrollbar">
-                <RecentFileList resultFiles={[{}]} />
+                <RecentFileList handleOpenFile={handleOpenFile} />
             </div>
 
         </div>

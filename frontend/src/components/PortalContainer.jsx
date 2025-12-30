@@ -29,7 +29,11 @@ const Portal = ({ children, closePortal }) => {
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (!event.target.closest('#portal-container') || event.target.dataset.type === "portal-close-button") {
-                window.location.hash = "";
+                // const hashParams = new URLSearchParams(window.location.hash.substring(1));
+                // hashParams.delete('openPortal');
+                // const newHash = hashParams.toString();
+                // window.location.hash = newHash ? `#${newHash}` : '';
+                // TODO: Verify if this works correctly
                 closePortal();
             }
         };
