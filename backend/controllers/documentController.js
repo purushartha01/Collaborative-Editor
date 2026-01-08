@@ -54,7 +54,12 @@ const createDocumentController = async (req, res, next) => {
 
 const getDocumentByIdController = async (req, res, next) => {
     try {
-        const document = await getDocumentById(req.params.id);
+        const fileId = req.params.id;
+        if (!fileId) {
+            res.locals.statusCode = 400;
+            throw new Error("Document Id is required");
+        }
+        const document = await getDocumentById(fileId);
         if (!document) {
             res.locals.statusCode = 404;
             throw new Error("Document not found");

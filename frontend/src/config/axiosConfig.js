@@ -27,14 +27,14 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config) => {
 
-        console.log("Access token found in store:", config);
+        // console.log("Access token found in store:", config);
         const accessToken = authStore.getState().accessToken;
         if (!accessToken) return config;
 
 
         if ((config.url?.startsWith("/documents") || config.url?.startsWith("/ai") || config.url?.startsWith("/auth/me") || config.url?.startsWith("/auth/logout")) && accessToken) {
             config.headers.set('Authorization', `Bearer ${accessToken}`);
-            console.log("Authorization header set in request");
+            // console.log("Authorization header set in request");
         }
 
         return config;
@@ -61,7 +61,7 @@ instance.interceptors.response.use(
         if (err.response.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
             try {
-                console.log("Attempting to refresh token");
+                // console.log("Attempting to refresh token");
                 const res = await authInstance.post('/auth/refresh', {});
                 const { accessToken } = res.data;
                 authStore.getState().assignAccessToken(accessToken);

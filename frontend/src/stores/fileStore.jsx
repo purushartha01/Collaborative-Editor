@@ -21,6 +21,14 @@ export const saveFileToDB = async (file) => {
     });
 }
 
+export const saveBackendFileToDB = async (file) => {
+    console.log("Saving backend file data to DB:", file);
+    return await fileDB.put("files", {
+        ...file
+    });
+}
+
+
 export const getFileFromDB = async (id) => {
     return await fileDB.get("files", id);
 }
@@ -60,23 +68,25 @@ export const fileStore = create((set, get) => ({
             console.error("Error adding new file:", err);
         }
     },
+
     addExistingFile: async (file) => {
         try {
-            set({
+            set({ 
                 fileId: file.fileId,
                 fileTitle: file.fileTitle,
                 pages: file.pages,
-                currentPage: 1
+                currentPage: file.currentPage ?? 1
             });
-            await saveFileToDB(file);
+            await saveBackendFileToDB(file);
         } catch (err) {
             console.error("Error setting and updating file:", err);
         }
     },
+
     loadFile: async (id) => {
         try {
             const file = await getFileFromDB(id);
-            console.log("File loaded from DB:", file);
+            // console.log("File loaded from DB:", file);
             if (!file) return;
             set({
                 fileId: file.fileId,
@@ -101,17 +111,23 @@ export const fileStore = create((set, get) => ({
         }
     }
     ,
-    updateFileDelta: async (pageNumber, delta) => {
+    updateFileDelta: (pageNumber, delta) => {
         try {
-            console.log("Updating file delta for page:", pageNumber, delta);
             const pages = get().pages.map((p) => p.pageNumber === pageNumber ? { ...p, delta } : p);
             console.log("File delta updated for page", pages);
             set({ pages });
-            await saveFileToDB({
+
+            return {
                 fileId: get().fileId,
                 fileTitle: get().fileTitle,
-                pages
-            });
+                pages: pages
+            }
+
+            // await saveFileToDB({
+            //     fileId: get().fileId,
+            //     fileTitle: get().fileTitle,
+            //     pages
+            // });
         } catch (err) {
             console.error("Error updating file delta:", err);
         }

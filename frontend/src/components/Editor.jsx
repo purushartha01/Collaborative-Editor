@@ -1,8 +1,9 @@
 import Quill from "quill";
 import { useEffect, useRef, useState } from "react";
 import EditorRef from "./EditorRef";
-import { fileStore } from "../stores/fileStore";
-import { useParams } from "react-router-dom";
+import { fileStore, saveFileToDB } from "../stores/fileStore";
+// import { useParams } from "react-router-dom";
+import { scheduleAutoSave } from "../controllers/autoSaveControllers";
 
 
 
@@ -19,16 +20,19 @@ const Editor = () => {
 
     const currentPageData = pages.filter((page) => page.pageNumber === currentPage)[0];
 
-    const loadFile = fileStore((state) => state.loadFile);
-    // console.log("Editor rendered with currentPage:", currentPageData);
+    // const loadFile = fileStore((state) => state.loadFile);
 
     const quillRef = useRef();
     const toolbarRef = useRef();
 
-    const fileId = useParams().id;
+    // const fileId = useParams().id;
 
     const preserveCursorIndex = (quill, newDelta) => {
         const currentSelection = quill.getSelection();
+        if (newDelta === null) {
+            newDelta = new Delta();
+        }
+
         quill.setContents(newDelta, 'silent');
 
         if (!currentSelection) return;
@@ -40,18 +44,42 @@ const Editor = () => {
     }
 
 
-    useEffect(() => {
-        const load = async () => {
-            await loadFile(fileId);
-        };
-        load();
-    }, [loadFile, fileId]);
+    // useEffect(() => {
+    //     const load = async () => {
+    //         await loadFile(fileId);
+    //     };
+    //     load();
+    // }, [loadFile, fileId]);
 
+
+    useEffect(() => {
+        const unexpectedShutdownHandler = async () => {
+            if (!quillRef.current) return;
+
+            const contents = quillRef.current.getContents();
+            const snapshot = updateFileDelta(fileStore.getState().currentPage, contents);
+            await saveFileToDB(snapshot);
+        }
+
+        window.addEventListener('beforeunload', unexpectedShutdownHandler);
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState === 'hidden') {
+                await unexpectedShutdownHandler();
+            }
+        });
+
+        return () => {
+            window.removeEventListener('beforeunload', unexpectedShutdownHandler);
+        }
+
+    }, [updateFileDelta]);
 
 
     useEffect(() => {
         if (!quillRef.current) return;
-        if (!currentPageData?.delta) return;
+
+        // This check is commented out to ensure delta is always applied even if it is null in case of a new page/document
+        // if (!currentPageData?.delta) return;
 
         const quill = quillRef.current;
 
@@ -68,8 +96,17 @@ const Editor = () => {
                         toolbarRef={toolbarRef}
                         onTextChange={async (delta, oldDelta, source) => {
                             if (source !== 'user') return;
+
                             const fullContent = quillRef.current.getContents();
-                            await updateFileDelta(currentPage, fullContent);
+
+                            const snapshot = updateFileDelta(currentPage, fullContent);
+
+                            console.log("Text changed by user. Updated snapshot:", snapshot);
+
+                            scheduleAutoSave(() => {
+                                console.log("Auto-saving document...");
+                                saveFileToDB(snapshot);
+                            });
                         }}
                         onSelectionChange={(range, oldRange, source) => {
                             // Handle selection change if needed

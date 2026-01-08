@@ -12,7 +12,7 @@ const escapeRegex = (value) => {
 
 const getAllDocumentsForUser = async (userId) => {
     console.log("Fetching all documents for user:", userId);
-    const foundDocuments =await userModel.findById(userId).select('_id username email').populate({
+    const foundDocuments = await userModel.findById(userId).select('_id username email').populate({
         path: 'collaborations',
         select: 'title _id createdAt updatedAt',
         options: { sort: { updatedAt: -1 }, limit: 10 }
@@ -138,7 +138,13 @@ const createDocument = async (documentData, owner) => {
 }
 
 const getDocumentById = async (documentId) => {
-    return DocumentModel.findById(documentId).populate('collaborators').populate('user', "username email").exec();
+    return DocumentModel.findById(documentId).populate({
+        path: 'collaborators',
+        populate: {
+            path: 'user',
+            select: 'username email profilePic googleProfilePic'
+        }
+    });
 }
 
 const updateDocument = async (documentId, updatedData) => {
