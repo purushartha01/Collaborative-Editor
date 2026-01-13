@@ -52,6 +52,19 @@ export const fileStore = create((set, get) => ({
     fileTitle: "Untitled Document",
     pages: [{ pageNumber: 1, delta: null }],
     currentPage: 1,
+    hasChanged: false,
+    markChanged: () => {
+        const { hasChanged } = get();
+        if (!hasChanged) {
+            set({ hasChanged: true });
+        }
+    },
+
+    markUnchanged: () => {
+        const { hasChanged } = get();
+        if (hasChanged)
+            set({ hasChanged: false });
+    },
 
     addNewFile: async (title, id) => {
         try {
@@ -63,6 +76,7 @@ export const fileStore = create((set, get) => ({
                 currentPage: 1
             });
             await saveFileToDB(getValueFields(get()));
+            get().markChanged();
             // console.log("New file added to store and saved to DB:", get());
         } catch (err) {
             console.error("Error adding new file:", err);
@@ -71,7 +85,7 @@ export const fileStore = create((set, get) => ({
 
     addExistingFile: async (file) => {
         try {
-            set({ 
+            set({
                 fileId: file.fileId,
                 fileTitle: file.fileTitle,
                 pages: file.pages,
@@ -106,6 +120,7 @@ export const fileStore = create((set, get) => ({
             file.fileTitle = newTitle;
             set({ fileTitle: newTitle });
             await saveFileToDB(file);
+            get().markChanged();
         } catch (err) {
             console.error("Error updating file name:", err);
         }
@@ -140,6 +155,7 @@ export const fileStore = create((set, get) => ({
             const updatedPages = [...pages, { pageNumber: newPageNumber, delta: null }];
             set({ pages: updatedPages, currentPage: newPageNumber });
             await saveFileToDB(getValueFields(get()));
+            get().markChanged();
         } catch (err) {
             console.error("Error adding new page:", err);
         }

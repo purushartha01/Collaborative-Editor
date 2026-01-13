@@ -85,7 +85,7 @@ const updateDocumentController = async (req, res, next) => {
 
         console.log("Updating document:", fileId, title, pages);
 
-        const updatedDocument = await updateDocument(req.params.id, {
+        const updatedDocument = await updateDocument(fileId, {
             title,
             pages,
         });

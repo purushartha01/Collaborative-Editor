@@ -19,6 +19,7 @@ const Editor = () => {
     const pages = fileStore((state) => state.pages);
 
     const currentPageData = pages.filter((page) => page.pageNumber === currentPage)[0];
+    const hasChanged = fileStore((state) => state.hasChanged);
 
     // const loadFile = fileStore((state) => state.loadFile);
 
@@ -55,6 +56,7 @@ const Editor = () => {
     useEffect(() => {
         const unexpectedShutdownHandler = async () => {
             if (!quillRef.current) return;
+            // if (!hasChanged) return;
 
             const contents = quillRef.current.getContents();
             const snapshot = updateFileDelta(fileStore.getState().currentPage, contents);
@@ -72,7 +74,7 @@ const Editor = () => {
             window.removeEventListener('beforeunload', unexpectedShutdownHandler);
         }
 
-    }, [updateFileDelta]);
+    }, [updateFileDelta, hasChanged]);
 
 
     useEffect(() => {
@@ -99,13 +101,20 @@ const Editor = () => {
 
                             const fullContent = quillRef.current.getContents();
 
-                            const snapshot = updateFileDelta(currentPage, fullContent);
+                            updateFileDelta(currentPage, fullContent);
 
-                            console.log("Text changed by user. Updated snapshot:", snapshot);
 
-                            scheduleAutoSave(() => {
-                                console.log("Auto-saving document...");
-                                saveFileToDB(snapshot);
+
+                            scheduleAutoSave(async () => {
+                                const state = fileStore.getState();
+                                const snapshot = {
+                                    fileId: state.fileId,
+                                    fileTitle: state.fileTitle,
+                                    pages: state.pages,
+                                    currentPage: state.currentPage
+                                };
+                                await saveFileToDB(snapshot);
+                                state.markChanged();
                             });
                         }}
                         onSelectionChange={(range, oldRange, source) => {

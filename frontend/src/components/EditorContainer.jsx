@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import instance from "./../config/axiosConfig"
 import authStore from "../stores/authStore";
 import { flushAutoSave } from "../controllers/autoSaveControllers";
+import { flushSyncToBackend, startBackgroundSync, stopBackgroundSync } from "../services/backgroundSyncService";
 
 const EditorContainer = () => {
     const addExistingFile = fileStore((state) => state.addExistingFile);
@@ -27,6 +28,21 @@ const EditorContainer = () => {
     //     });
 
     // }
+
+    useEffect(() => {
+        if (!fileId) return;
+        return () => {
+            flushSyncToBackend("fileId-changed");
+        }
+    }, [fileId]);
+
+    useEffect(() => {
+        startBackgroundSync();
+
+        return () => {
+            stopBackgroundSync();
+        }
+    }, []);
 
 
     useEffect(() => {
@@ -54,8 +70,11 @@ const EditorContainer = () => {
     }, [fileId, addExistingFile]);
 
     return (
-        <div className="editor-container row-start-2 row-span-1 col-span-1">
+        <div className="editor-container relative row-start-2 row-span-1 col-span-1">
             <Editor />
+            <div className="absolute">
+
+            </div>
         </div>
     )
 }
