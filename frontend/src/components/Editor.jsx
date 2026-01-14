@@ -4,6 +4,10 @@ import EditorRef from "./EditorRef";
 import { fileStore, saveFileToDB } from "../stores/fileStore";
 // import { useParams } from "react-router-dom";
 import { scheduleAutoSave } from "../controllers/autoSaveControllers";
+import { aiSocket } from "../sockets/socketClient";
+import { initializeSuggestionListener, removeSuggestionListener, requestAISuggestion } from "../controllers/suggestionController";
+import PhantomSuggestionOverlay from "./PhantomSuggestionOverlay";
+import { useParams } from "react-router-dom";
 
 
 
@@ -11,7 +15,7 @@ const Delta = Quill.import('delta');
 
 const Editor = () => {
 
-    const [currentPageDelta, setCurrentPageDelta] = useState(null);
+    const [phantomSuggestion, setPhantomSuggestion] = useState(null);
 
     const currentPage = fileStore((state) => state.currentPage);
     const updateFileDelta = fileStore((state) => state.updateFileDelta);
@@ -25,8 +29,9 @@ const Editor = () => {
 
     const quillRef = useRef();
     const toolbarRef = useRef();
+    const editorParentRef = useRef();
 
-    // const fileId = useParams().id;
+    const fileId = useParams().id;
 
     const preserveCursorIndex = (quill, newDelta) => {
         const currentSelection = quill.getSelection();
@@ -44,6 +49,22 @@ const Editor = () => {
         quill.setSelection(index, currentSelection.length, 'silent');
     }
 
+    useEffect(() => {
+        if (!fileId) return;
+
+        initializeSuggestionListener(aiSocket, (response) => {
+            console.log("Received AI suggestion:", response);
+
+            setPhantomSuggestion(response);
+
+            // Handle the suggestion, e.g., display it in the UI
+        });
+
+        return () => {
+            removeSuggestionListener(aiSocket);
+        }
+
+    }, [fileId]);
 
     // useEffect(() => {
     //     const load = async () => {
@@ -51,6 +72,41 @@ const Editor = () => {
     //     };
     //     load();
     // }, [loadFile, fileId]);
+
+
+    useEffect(() => {
+        if (!phantomSuggestion) return;
+        const handleKeydown = (e) => {
+            if (e.key === "Tab") {
+                e.preventDefault();
+                const quill = quillRef.current;
+                if (!quill) return;
+
+                const { suggestion, cursorPosition } = phantomSuggestion;
+
+                quill.insertText(cursorPosition, suggestion, 'user');
+                quill.setSelection(cursorPosition + suggestion.length, 0, 'user');
+
+                setPhantomSuggestion(null);
+                return;
+
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                setPhantomSuggestion(null);
+                return;
+            }
+        }
+
+        const parent = editorParentRef.current;
+        if (!parent) return;
+
+        parent.addEventListener("keydown", handleKeydown);
+
+        return () => {
+            parent.removeEventListener("keydown", handleKeydown);
+        };
+
+    }, [phantomSuggestion])
 
 
     useEffect(() => {
@@ -92,7 +148,7 @@ const Editor = () => {
     return (
         <div className="w-full h-full overflow-y-auto flex justify-center py-4 relative">
             <div className="h-281.75 w-198.5 bg-orange-100 overflow-hidden text-black" id="editor">
-                <div>
+                <div className="relative w-full h-full" ref={editorParentRef} tabIndex={0}>
                     <EditorRef
                         ref={quillRef}
                         toolbarRef={toolbarRef}
@@ -116,11 +172,20 @@ const Editor = () => {
                                 await saveFileToDB(snapshot);
                                 state.markChanged();
                             });
+
+                            requestAISuggestion({
+                                aiSocket,
+                                fileId: fileStore.getState().fileId,
+                                pageNumber: fileStore.getState().currentPage,
+                                cursorPosition: quillRef.current.getSelection()?.index || 0,
+                                contextText: quillRef.current.getText()
+                            });
                         }}
                         onSelectionChange={(range, oldRange, source) => {
                             // Handle selection change if needed
                         }}
                     />
+                    <PhantomSuggestionOverlay quill={quillRef.current} suggestion={phantomSuggestion} />
                 </div>
             </div>
         </div>

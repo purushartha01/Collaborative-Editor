@@ -4,7 +4,7 @@ import instance from "./../config/axiosConfig";
 let syncIntervalId = null;
 let isSyncing = false;
 
-const SYNC_INTERVAL = 6000; // 30 seconds 
+const SYNC_INTERVAL = 60000; // 60 seconds 
 
 export const startBackgroundSync = () => {
     if (syncIntervalId) {

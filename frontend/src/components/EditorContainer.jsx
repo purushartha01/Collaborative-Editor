@@ -6,6 +6,8 @@ import instance from "./../config/axiosConfig"
 import authStore from "../stores/authStore";
 import { flushAutoSave } from "../controllers/autoSaveControllers";
 import { flushSyncToBackend, startBackgroundSync, stopBackgroundSync } from "../services/backgroundSyncService";
+import { aiSocket, documentSocket } from './../sockets/socketClient';
+import { initializeSuggestionListener, removeSuggestionListener } from "../controllers/suggestionController";
 
 const EditorContainer = () => {
     const addExistingFile = fileStore((state) => state.addExistingFile);
@@ -35,6 +37,44 @@ const EditorContainer = () => {
             flushSyncToBackend("fileId-changed");
         }
     }, [fileId]);
+
+    useEffect(() => {
+        if (!fileId) return;
+
+        aiSocket.on("connect", () => {
+            aiSocket.emit("join-ai-room", { fileId, userId: user.id });
+        })
+
+        documentSocket.on("connect", () => {
+            documentSocket.emit("join-document", { fileId, userId: user.id });
+        });
+
+        aiSocket.on("connect_error", (err) => {
+            console.error("AI Socket connection error", err);
+        });
+
+        documentSocket.on("connect_error", (err) => {
+            console.error("Document Socket connection error", err);
+        });
+
+        documentSocket.connect();
+        aiSocket.connect();
+
+        console.log("Connected to document and AI sockets for file:", fileId);
+
+        return () => {
+            documentSocket.emit("leave-document", { fileId, userId: user.id });
+            aiSocket.emit("leave-ai-room", { fileId, userId: user.id });
+
+            aiSocket.off("connect");
+            aiSocket.off("connect_error");
+            documentSocket.off("connect");
+            documentSocket.off("connect_error");
+
+            documentSocket.disconnect();
+            aiSocket.disconnect();
+        }
+    }, [fileId, user.id]);
 
     useEffect(() => {
         startBackgroundSync();

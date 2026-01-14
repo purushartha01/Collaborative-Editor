@@ -2,6 +2,7 @@ import morgan from "morgan";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import http from "http";
 
 import { connectToDB } from "./config/dbConfig.js";
 import { PORTNO } from "./config/serverConfig.js";
@@ -10,6 +11,7 @@ import documentRoutes from './routes/documentRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import authRouter from "./routes/authRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import { initializeWebSocket } from './websocket-handlers/index.js';
 
 
 const app = express();
@@ -37,11 +39,16 @@ app.use("/v1/api/auth", userRoutes);
 app.use("/v1/api/documents", documentRoutes);
 app.use("/v1/api/ai", aiRoutes)
 
+const httpServer = http.createServer(app);
+
+initializeWebSocket(httpServer);
+
 app.use(errorHandler)
+
 
 connectToDB().then(() => {
     console.log("Connected to the database");
-    app.listen(PORTNO, () => {
+    httpServer.listen(PORTNO, () => {
         console.log(`Server is running on port ${PORTNO}`);
     })
 }).catch((err) => {

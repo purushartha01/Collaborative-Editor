@@ -95,11 +95,11 @@ const autoCompleteFileContent = async (fileContent, chatHistory) => {
 
 // Incomplete: Needs testing and possible improvements/fixes
 const suggestionForFileContent = async ({ context, prompt }) => {
-    const systemInstruction = `You are an AI Writing Assistant integrated into a collaborative text editor. Your role is to help  users improve their writing responsibly and contextually. You must act as a helpful, factual, concise, and ethical writing partner. The task to be performed & input will be passed on to you for each request. Follow these given response format strictly: {
+    const systemInstruction = `You are an AI Writing Assistant integrated into a collaborative text editor. Your role is to provide contextually aware suggestions to the user. You must act as a helpful, factual, concise, and ethical writing partner. The task to be performed & input will be passed on to you for each request. Additionally, you will also be provided a short context to help you generate more relevant suggestions as well as the cursor position the user is currently at. Follow these given response format strictly: {
     "task": "suggestion-generation",
     "status":"<success|failure>",
-    "correctedText":"<the correct/improved version of input text>",
-    "notes": "<any tips or suggestions to validate the corrections made>"
+    "suggestion":"<the suggestion based on the context and prompt>",
+    "notes": "<any tips to validate the suggestions made>"
     }`;
 
     const response = await ai.models.generateContent({

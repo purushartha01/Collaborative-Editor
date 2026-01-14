@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "startApp":"concurrently --prefix-colors \"blue,green\" \"cd frontend && npm run dev\" \"cd backend && npm start\"",
-    "installDeps":"npm ci && concurrently --prefix-colors \"blue,green\" \"cd frontend && npm ci\" \"cd backend && npm ci\""
+    "startApp": "concurrently --prefix-colors \"blue,green\" \"cd backend && npm start\" \"cd frontend && npm run dev\"",
+    "installDeps": "npm ci && concurrently --prefix-colors \"blue,green\" \"cd frontend && npm ci\" \"cd backend && npm ci\""
   },
   "repository": {
     "type": "git",
